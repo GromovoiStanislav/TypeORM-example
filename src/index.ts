@@ -1,9 +1,7 @@
 import "reflect-metadata";
-import { DataSource} from "typeorm";
-import { Book2 } from "./entity/Book2";
-import {Audit} from "./entity/Audit";
-import {Name} from "./entity/Name";
-import {Author} from "./entity/Author";
+import {DataSource} from "typeorm";
+import {User2} from "./entity/User2";
+import {Phone2} from "./entity/Phone2";
 
 const connectDB = new DataSource({
     type: 'mysql',
@@ -18,29 +16,30 @@ const connectDB = new DataSource({
 
 connectDB.initialize().then(async connection => {
 
-    const audit = new Audit();
-    audit.created_by = "user1";
-    audit.created_on = new Date();
-    audit.updated_by = "user2";
-    audit.updated_on = new Date();
+    // Data Mapper
+    const user = new User2();
+    user.firstName = "John";
+    user.lastName = "Doe";
 
-    const name = new Name();
-    name.first = "Robert";
-    name.last = "Martin";
+    const userRepository = connection.getRepository(User2);
+    await userRepository.save(user);
 
-    const author = new Author();
-    author.name = name;
+    const user1 = await userRepository.findOne({where: {firstName: "John", lastName: "Doe"}});
+    console.log("User: ", user1);
 
-    const book = new Book2();
-    book.title = "Clean Code";
-    book.author = author;
-    book.price = 33;
-    book.audit = audit;
+    const users = await userRepository.find();
+    console.log("Users: ", users);
 
 
-    const bookRepository = connection.getRepository(Book2);
-    await bookRepository.save(book);
+    // Active Record
+    const phone = new Phone2();
+    phone.phoneNumber = 12345678;
+    await phone.save();
 
-;
+    const phone1 = await Phone2.findOne({where: {phoneNumber: 12345678}});
+    console.log("Phone: ", phone1);
+
+    const phones = await Phone2.find()
+    console.log("Phones: ", phones);
 
 }).catch(error => console.log(error));
