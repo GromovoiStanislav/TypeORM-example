@@ -1,7 +1,9 @@
 import "reflect-metadata";
-import {createConnection, DataSource} from "typeorm";
-import { Book } from "./entity/Book";
-import { Pen } from "./entity/Pen";
+import { DataSource} from "typeorm";
+import { Book2 } from "./entity/Book2";
+import {Audit} from "./entity/Audit";
+import {Name} from "./entity/Name";
+import {Author} from "./entity/Author";
 
 const connectDB = new DataSource({
     type: 'mysql',
@@ -16,21 +18,29 @@ const connectDB = new DataSource({
 
 connectDB.initialize().then(async connection => {
 
-    const book = new Book();
-    book.name = "Clean Code First Edition";
+    const audit = new Audit();
+    audit.created_by = "user1";
+    audit.created_on = new Date();
+    audit.updated_by = "user2";
+    audit.updated_on = new Date();
+
+    const name = new Name();
+    name.first = "Robert";
+    name.last = "Martin";
+
+    const author = new Author();
+    author.name = name;
+
+    const book = new Book2();
     book.title = "Clean Code";
-    book.author = "Robert C. Martin";
-    book.price = 120;
+    book.author = author;
+    book.price = 33;
+    book.audit = audit;
 
-    const pen = new Pen();
-    pen.name = "Blue pen";
-    pen.color = "blue";
-    pen.price = 2;
 
-    const bookRepository = connection.getRepository(Book);
+    const bookRepository = connection.getRepository(Book2);
     await bookRepository.save(book);
 
-    const penRepository = connection.getRepository(Pen);
-    await penRepository.save(pen);
+;
 
 }).catch(error => console.log(error));
