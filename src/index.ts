@@ -42,28 +42,25 @@ connectDB
 
 
     console.log("Loading users from the database...");
-
     //const users = await userRepository.find({ relations: ["profile"] });
+    const users = await userRepository
+                    .createQueryBuilder("user")
+                    .leftJoinAndSelect("user.profile", "profile")
+                    .getMany();
 
-    // const users = await userRepository
-    //                 .createQueryBuilder("user")
-    //                 .leftJoinAndSelect("user.profile", "profile")
-    //                 .getMany();
-    //
-    // console.log("Loaded users: ", users);
-    //
-    //
-    // console.log("Loading profiles from the database...")
-    //
-    // const profileRepository = connection.getRepository(Profile);
-    // //const profiles = await profileRepository.find({ relations: ["user"] });
-    //
-    // const profiles = await profileRepository
-    //                 .createQueryBuilder("profile")
-    //                 .leftJoinAndSelect("profile.user", "user")
-    //                 .getMany();
-    //
-    // console.log("Loaded profiles: ", profiles);
+    console.log("Loaded users: ", users);
+
+
+    console.log("Loading profiles from the database...")
+
+    const profileRepository = connection.getRepository(Profile);
+    //const profiles = await profileRepository.find({ relations: ["user"] });
+    const profiles = await profileRepository
+                    .createQueryBuilder("profile")
+                    .leftJoinAndSelect("profile.user", "user")
+                    .getMany();
+
+    console.log("Loaded profiles: ", profiles);
 
 
 }).catch(error => console.log(error));
