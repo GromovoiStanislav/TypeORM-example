@@ -4,6 +4,7 @@ import { Profile } from "./entity/Profile";
 import {User} from "./entity/User";
 import ormconfig from "../ormconfig.json"
 import {DataSourceOptions} from "typeorm/data-source/DataSourceOptions";
+import {Phone} from "./entity/Phone";
 
 
 //const connectDB = new DataSource(ormconfig as DataSourceOptions);
@@ -25,42 +26,66 @@ connectDB
     console.log("Inserting a new user into the database...");
 
     const user = new User();
-    user.firstName = "Timber";
-    user.lastName = "Saw";
-    user.age = 35;
+    user.firstName = "John";
+    user.lastName = "Doe";
+    user.age = 26;
+
+    const phone = new Phone();
+    phone.phoneNumber = 12345678;
+
+    user.addPhone(phone);
 
     const profile = new Profile();
     profile.gender = "M";
-    profile.photo = "http://photos.google.com/images/1.png";
-    profile.user = user;
+    profile.photo = "http://photos.google.com/images/2.png";
+    //profile.user = user;
 
     user.profile = profile;
 
     //await connection.manager.save(user)
     const userRepository = connection.getRepository(User);
     await userRepository.save(user);
+    console.log("Saved a new user with id:"+user.id);
+
+
 
 
     console.log("Loading users from the database...");
     //const users = await userRepository.find({ relations: ["profile"] });
+    // const users = await userRepository
+    //                 .createQueryBuilder("user")
+    //                 .leftJoinAndSelect("user.profile", "profile")
+    //                 .getMany();
+    //
+    // console.log("Loaded users: ", users);
+
+
+    // console.log("Loading profiles from the database...")
+    //
+    // const profileRepository = connection.getRepository(Profile);
+    // //const profiles = await profileRepository.find({ relations: ["user"] });
+    // const profiles = await profileRepository
+    //                 .createQueryBuilder("profile")
+    //                 .leftJoinAndSelect("profile.user", "user")
+    //                 .getMany();
+    //
+    // console.log("Loaded profiles: ", profiles);
+
+
+
     const users = await userRepository
-                    .createQueryBuilder("user")
-                    .leftJoinAndSelect("user.profile", "profile")
-                    .getMany();
+        .createQueryBuilder("user")
+        .leftJoinAndSelect("user.profile", "profile")
+        .leftJoinAndSelect("user.phones", "phones")
+        .getMany();
 
     console.log("Loaded users: ", users);
 
+    users.forEach(user => {
+        console.log("Phones: ", user.phones);
+    });
 
-    console.log("Loading profiles from the database...")
 
-    const profileRepository = connection.getRepository(Profile);
-    //const profiles = await profileRepository.find({ relations: ["user"] });
-    const profiles = await profileRepository
-                    .createQueryBuilder("profile")
-                    .leftJoinAndSelect("profile.user", "user")
-                    .getMany();
-
-    console.log("Loaded profiles: ", profiles);
 
 
 }).catch(error => console.log(error));
