@@ -1,7 +1,8 @@
 import "reflect-metadata";
 import {DataSource} from "typeorm";
-import {User2} from "./entity/User2";
-import {Phone2} from "./entity/Phone2";
+import {UserEager} from "./entity/UserEager";
+import {PhoneEager} from "./entity/PhoneEager";
+
 
 const connectDB = new DataSource({
     type: 'mysql',
@@ -16,30 +17,27 @@ const connectDB = new DataSource({
 
 connectDB.initialize().then(async connection => {
 
-    // Data Mapper
-    const user = new User2();
+    // Eager
+    const user = new UserEager();
     user.firstName = "John";
     user.lastName = "Doe";
+    user.age = 26;
 
-    const userRepository = connection.getRepository(User2);
+    const phone = new PhoneEager();
+    phone.phoneNumber = 12345678;
+
+    user.phones = [phone];
+
+    const userRepository = connection.getRepository(UserEager);
     await userRepository.save(user);
 
-    const user1 = await userRepository.findOne({where: {firstName: "John", lastName: "Doe"}});
-    console.log("User: ", user1);
-
     const users = await userRepository.find();
-    console.log("Users: ", users);
 
+    console.log("Loaded users: ", users);
 
-    // Active Record
-    const phone = new Phone2();
-    phone.phoneNumber = 12345678;
-    await phone.save();
+    users.forEach(user => {
+        console.log("Phones: ", user.phones);
+    });
 
-    const phone1 = await Phone2.findOne({where: {phoneNumber: 12345678}});
-    console.log("Phone: ", phone1);
-
-    const phones = await Phone2.find()
-    console.log("Phones: ", phones);
 
 }).catch(error => console.log(error));
