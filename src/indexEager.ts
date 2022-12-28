@@ -1,7 +1,7 @@
 import "reflect-metadata";
 import {DataSource} from "typeorm";
-import {UserLazy} from "./entity/UserLazy";
-import {PhoneLazy} from "./entity/PhoneLazy";
+import {UserEager} from "./entity/UserEager";
+import {PhoneEager} from "./entity/PhoneEager";
 
 
 const connectDB = new DataSource({
@@ -17,24 +17,27 @@ const connectDB = new DataSource({
 
 connectDB.initialize().then(async connection => {
 
-    // Lazy
-
-    const user = new UserLazy();
+    // Eager
+    const user = new UserEager();
     user.firstName = "John";
     user.lastName = "Doe";
     user.age = 26;
-    const phone = new PhoneLazy();
-    phone.phoneNumber = 12345678;
-    user.phones = Promise.resolve([phone]);
 
-    const userRepository = connection.getRepository(UserLazy);
+    const phone = new PhoneEager();
+    phone.phoneNumber = 12345678;
+
+    user.phones = [phone];
+
+    const userRepository = connection.getRepository(UserEager);
     await userRepository.save(user);
 
-
     const users = await userRepository.find();
-    console.log("Loaded users without phones: ", users);
-    const phones = await users[0].phones;
-    console.log("Phones: ", phones );
+
+    console.log("Loaded users: ", users);
+
+    users.forEach(user => {
+        console.log("Phones: ", user.phones);
+    });
 
 
 }).catch(error => console.log(error));
